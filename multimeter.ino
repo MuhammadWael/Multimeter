@@ -16,10 +16,10 @@ void voltmeter() {
 
   for (int i = 0; i < 20 ; i++) //looping to obtain average of read values
   { 
-    adc_value = adc_value + analogRead(VOLTAGE_INPUT);//Voltohmmeter connected to pin A2
+    adc_value += analogRead(VOLTAGE_INPUT);//Voltohmmeter connected to pin A2
     delay(5); 
   } 
-  adc_value = adc_value / 20; 
+  adc_value /= 20; 
   voltage = ((adc_value * v_ref) / 1024.0); 
   V = voltage / (R2 / (R1 + R2)); 
   
@@ -28,7 +28,13 @@ void voltmeter() {
 void ohmmeter() { 
   float v_out = 0.0;
   float R1 = 10000;
-  float adc_value = analogRead(RESISTANCE_INPUT);//which is A1
+  float adc_value = 0;
+  for (int i = 0; i < 20 ; i++) //looping to obtain average of read values
+  { 
+    adc_value += analogRead(RESISTANCE_INPUT);//connected to pin A1
+    delay(5); 
+  } 
+  adc_value /= 20;
   v_out = ((adc_value * v_ref) / 1024.0);
   R = R1*(v_ref/v_out-1);
 }
@@ -45,7 +51,7 @@ void ammeter()
     adc_value = adc_value + analogRead(CURRENT_INPUT); 
     delay(5); 
   } 
-  adc_value /= 40; 
+  adc_value /= 20; 
   voltage = (((adc_value * v_ref) / 1024) - 2.5)/sensitivity; 
 
   I = voltage / sensitivity; 
