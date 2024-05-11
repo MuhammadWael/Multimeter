@@ -1,12 +1,23 @@
 #include <LiquidCrystal.h>
 #define VOLTAGE_INPUT A2
 #define RESISTANCE_INPUT A1
-#define CURRENT_INPUT A0
+#define CURRENT_INPUT A3
+#define CURRENT2_INPUT A0
 
-
+//for displaying ohm 
+byte ohmSymbol[8] = {
+  B00000,
+  B01110,
+  B10001,
+  B10001,
+  B10001,
+  B01010,
+  B11011,
+  B00000
+};
 
 LiquidCrystal lcd(2,3,4,5,6,7);
-float V = 0.00, I = 0.00, R =0.00; //the values to be read
+float V = 0.00, I = 0.00, R =0.00, I2 = 0.00; //the values to be read
 float v_ref = 5.00; 
 void voltmeter() { 
   const float R1 = 10000.00; 
@@ -57,7 +68,22 @@ void ammeter()
   I = voltage / sensitivity; 
 }
 
-void display_values(float v, float i, float r) {
+void ammeter2()
+{
+  int adc_value = 0; 
+  float voltage = 0.0; 
+  for (int i = 0; i < 20 ; i++) 
+  { 
+    adc_value = adc_value + analogRead(CURRENT2_INPUT); 
+    delay(5); 
+  } 
+  adc_value /= 20; 
+ voltage = ((adc_value * v_ref) / 1024.0); 
+
+  I2 = voltage*1000 / (220); 
+}
+
+void display_values(float v, float i, float r,float i2) {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("V=");
@@ -69,10 +95,16 @@ void display_values(float v, float i, float r) {
   lcd.print(i);
   lcd.print("A");
 
+  lcd.createChar(0, ohmSymbol);
   lcd.setCursor(0, 1);
   lcd.print("R=");
-  lcd.print(r);
-  lcd.print(" Ohm");
+  lcd.print((int)r);
+  lcd.write(byte(0));
+
+  lcd.setCursor(7, 1);
+  lcd.print("I2=");
+  lcd.print(i2);
+  lcd.print("mA");
 }
 
 void setup() { 
@@ -94,6 +126,10 @@ void loop() {
   Serial.print("I= ");
   Serial.print(I); 
   Serial.println(" A"); 
-  display_values(V,I,R);
+  ammeter2();
+  Serial.print("I2= ");
+  Serial.print(I2); 
+  Serial.println(" A"); 
+  display_values(V,I,R,I2);
   delay(2000); 
 } 
